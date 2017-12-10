@@ -1,0 +1,31 @@
+{
+  "name": "image-api",
+  "version": "1.0.0",
+  "description": "Node js image compression api",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/code-fi/image-api.git"
+  },
+  "author": "CodeFi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/code-fi/image-api/issues"
+  },
+  "homepage": "https://github.com/code-fi/image-api#readme",
+
+  "dependencies":{
+    "url":"0.11.0",
+    
+    "got":"8.1.0",
+    
+    "imagemin":"5.3.1",
+    "imagemin-gifsicle":"5.2.0",
+    "imagemin-mozjpeg":"6.0.0",
+    "imagemin-jpegtran":"5.0.2",
+    "imagemin-pngquant":"5.0.1"
+  }
+}
