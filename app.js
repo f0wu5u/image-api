@@ -1,55 +1,70 @@
-var app = require('http'),
-    url = require('url'),
-
-    //IMAGE COMPRESION DEPENDENCIES
-
-    imagemin = require('imagemin'),
-    imageminJpegtran = require('imagemin-jpegtran'),
-    imageminPngquant = require('imagemin-pngquant'),
-    imageminMozjpeg = require('imagemin-mozjpeg'),
-    imageminGifsicle = require('imagemin-gifsicle'),
-
-    //Remote image loader
-    got = require('got')
+const app = require('http');
+const url = require('url');
 
 
 
+/**
+ * Init node server
+ * 
+ * @param req http request
+ * @param res http response
+ */
+function initServer(req, res) {
+    var requestURL = url.parse(req.url, true);
+
+    /**
+     * Search exist?
+     *  @return processReq
+     */
+    if (requestURL.search == "") return res.end('Nodejs Image API, by Code-FI');
+
+    return processReq(requestURL.query, res);
+}
+
+/**
+ * Process 
+ */
+async function processReq({ file, device, hd }, res) {
+
+    if (!file) return res.end("Missing image file !");
 
 
-const initServer = async (request, response) => {
+    /**
+     * Get device preset quality
+     */
+    var quality = hd ? 90 : getDeviceQuality(device),
+        optimizationLevel = (hd || quality >= 60) ? 1 : 2;
+    var got = require('got');
 
-    var requestURL = url.parse(request.url, true);
-    if (requestURL.search != "") {
-        const { file, device, hd } = requestURL.query;
+    const imageFile = await got(file, { encoding: null, timeout: 10000 })
+        .catch(error => console.log(error));
 
-        if (file) {
+    if (!imageFile || !imageFile.body) return res.end("Couldn't load image from remote server");
 
-            var quality = hd ? 90 : getDeviceQuality(device),
-                optimizationLevel = (hd || quality >= 60) ? 1 : 2;
+    var imagemin = require('imagemin'),
+        imageminJpegtran = require('imagemin-jpegtran'),
+        imageminPngquant = require('imagemin-pngquant'),
+        imageminMozjpeg = require('imagemin-mozjpeg'),
+        imageminGifsicle = require('imagemin-gifsicle');
 
-            const imageResponse = await got.get(file, { encoding: null });
+    const compressedImage = await imagemin.buffer(imageFile.body, {
+        plugins: [
+            imageminGifsicle({ optimizationLevel, interlaced: true }),
+            imageminMozjpeg({ quality }),
+            imageminJpegtran({ progressive: true }),
+            imageminPngquant({ quality: `${quality}-80` })
+        ]
+    }).catch(error => console.log(error));
 
-            if (imageResponse && imageResponse.body) {
-                const compressedImage = await imagemin.buffer(imageResponse.body, {
-                    plugins: [
-                        imageminGifsicle({ optimizationLevel, interlaced: true }),
-                        imageminMozjpeg({ quality }),
-                        imageminJpegtran({ progressive: true }),
-                        imageminPngquant({ quality: `${quality}-80` })
-                    ]
-                })
-                    .catch(error => response.end(`Couldn't compress image\n\n${error}`));
+    return res.end(compressedImage || "Couldn't compress image");
 
-                if (compressedImage) return response.end(compressedImage)
-            }
-            return response.end("Couldn't load image from remote resource!");
-        }
-        return response.end("Missing image file !");
-    }
-    return response.end("Node.js image API");
 }
 
 
+/**
+ * 
+ * @param device type device rendering image to
+ */
 function getDeviceQuality(device) {
     var quality = 60;
     switch (device) {
