@@ -18,47 +18,37 @@ var server = app.createServer(initServer);
 server.listen(42190, "localhost");
 
 
-function initServer(request, response) {
+const initServer = async (request, response) => {
 
     var requestURL = url.parse(request.url, true);
-
     if (requestURL.search != "") {
-
         const { file, device, hd } = requestURL.query;
 
         if (file) {
 
             var quality = hd ? 90 : getDeviceQuality(device),
-                
                 optimizationLevel = (hd || quality >= 60) ? 1 : 2;
 
-                got.get(file,{encoding:null})
-                .then(imageResponse=>{
-                    imagemin.buffer(imageResponse.body,{
-                        plugins:[
-                            imageminGifsicle({optimizationLevel,interlaced:true}),
-                            imageminMozjpeg({quality}),
-                            imageminJpegtran({progressive:true}),
-                            imageminPngquant({quality:`${quality}-80`})
-                        ]
-                    })
-                    .then(compressedImage=>{
-                        return response.end(compressedImage)
-                    })
-                    .catch(error=>{
-                        return response.end("Couldn't compress image\n\n"+error)
-                    })
-                })
-                .catch(error=>{
-                    return response.end("Couldn't load image from remote source\n\n"+error)
-                })
+            const imageResponse = await got.get(file, { encoding: null });
 
-        } else {
-            return response.end("Missing image file !")
+            if (imageResponse && imageResponse.body) {
+                const compressedImage = await imagemin.buffer(imageResponse.body, {
+                    plugins: [
+                        imageminGifsicle({ optimizationLevel, interlaced: true }),
+                        imageminMozjpeg({ quality }),
+                        imageminJpegtran({ progressive: true }),
+                        imageminPngquant({ quality: `${quality}-80` })
+                    ]
+                })
+                .catch(error => response.end(`Couldn't compress image\n\n${error}`));
+
+                if (compressedImage) return response.end(compressedImage)
+            }
+            return response.end("Couldn't load image from remote resource!");
         }
-    }else{
-        return response.end("Node.js image API")
+        return response.end("Missing image file !");
     }
+    return response.end("Node.js image API");
 }
 
 
