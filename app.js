@@ -13,9 +13,7 @@ var app = require('http'),
     got = require('got')
 
 
-var server = app.createServer(initServer);
 
-server.listen(42190, "localhost");
 
 
 const initServer = async (request, response) => {
@@ -40,7 +38,7 @@ const initServer = async (request, response) => {
                         imageminPngquant({ quality: `${quality}-80` })
                     ]
                 })
-                .catch(error => response.end(`Couldn't compress image\n\n${error}`));
+                    .catch(error => response.end(`Couldn't compress image\n\n${error}`));
 
                 if (compressedImage) return response.end(compressedImage)
             }
@@ -75,3 +73,6 @@ function getDeviceQuality(device) {
     }
     return quality;
 }
+
+var server = app.createServer(initServer);
+server.listen(42190, "localhost");
