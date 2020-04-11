@@ -1,8 +1,13 @@
 const app = require('http');
 const url = require('url');
 
+const imagemin = require('imagemin'),
+imageminJpegtran = require('imagemin-jpegtran'),
+imageminPngquant = require('imagemin-pngquant'),
+imageminMozjpeg = require('imagemin-mozjpeg'),
+imageminGifsicle = require('imagemin-gifsicle');
 
-
+var got = require('got');
 /**
  * Init node server
  * 
@@ -34,18 +39,14 @@ async function processReq({ file, device, hd }, res) {
      */
     var quality = hd ? 90 : getDeviceQuality(device),
         optimizationLevel = (hd || quality >= 60) ? 1 : 2;
-    var got = require('got');
+ 
 
     var imageFile = await got(file, { encoding: null, timeout: 10000 })
         .catch(error => console.log(error));
 
     if (!imageFile || !imageFile.body) return res.end("Couldn't load image from remote server");
 
-    var imagemin = require('imagemin'),
-        imageminJpegtran = require('imagemin-jpegtran'),
-        imageminPngquant = require('imagemin-pngquant'),
-        imageminMozjpeg = require('imagemin-mozjpeg'),
-        imageminGifsicle = require('imagemin-gifsicle');
+   
 
     const compressedImage = await imagemin.buffer(imageFile.body, {
         plugins: [
@@ -56,13 +57,14 @@ async function processReq({ file, device, hd }, res) {
         ]
     }).catch(error => console.log(error));
 
-    imagemin = null;
-    imageminGifsicle=null;
-    imageminJpegtran=null;
-    imageminMozjpeg=null;
-    imageminPngquant=null;
+    // imagemin = null;
+    // imageminGifsicle=null;
+    // imageminJpegtran=null;
+    // imageminMozjpeg=null;
+    // imageminPngquant=null;
     imageFile = null;
-    got = null;
+    quality= null;
+    // got = null;
 
     return res.end(compressedImage || "Couldn't compress image");
 
