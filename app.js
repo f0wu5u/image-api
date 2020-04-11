@@ -29,10 +29,10 @@ function initServer(request, response) {
         if (file) {
 
             var quality = hd ? 90 : getDeviceQuality(device),
-                   encodedURI = encodeURI(file),
+                
                 optimizationLevel = (hd || quality >= 60) ? 1 : 2;
 
-                got.get(encodedURI,{encoding:null})
+                got.get(file,{encoding:null})
                 .then(imageResponse=>{
                     imagemin.buffer(imageResponse.body,{
                         plugins:[
