@@ -54,10 +54,10 @@ function initServer(request, response) {
                 })
 
         } else {
-            response.end("Missing image file !")
+            return response.end("Missing image file !")
         }
     }else{
-        response.end("Node.js image API")
+        return response.end("Node.js image API")
     }
 }
 
