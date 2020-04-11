@@ -36,7 +36,7 @@ async function processReq({ file, device, hd }, res) {
         optimizationLevel = (hd || quality >= 60) ? 1 : 2;
     var got = require('got');
 
-    const imageFile = await got(file, { encoding: null, timeout: 10000 })
+    var imageFile = await got(file, { encoding: null, timeout: 10000 })
         .catch(error => console.log(error));
 
     if (!imageFile || !imageFile.body) return res.end("Couldn't load image from remote server");
@@ -55,6 +55,14 @@ async function processReq({ file, device, hd }, res) {
             imageminPngquant({ quality: `${quality}-80` })
         ]
     }).catch(error => console.log(error));
+
+    imagemin = null;
+    imageminGifsicle=null;
+    imageminJpegtran=null;
+    imageminMozjpeg=null;
+    imageminPngquant=null;
+    imageFile = null;
+    got = null;
 
     return res.end(compressedImage || "Couldn't compress image");
 
