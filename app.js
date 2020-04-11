@@ -32,7 +32,7 @@ function initServer(request, response) {
                    encodedURI = encodeURI(file),
                 optimizationLevel = (hd || quality >= 60) ? 1 : 2;
 
-                got.get(encodedURL,{encoding:null})
+                got.get(encodedURI,{encoding:null})
                 .then(imageResponse=>{
                     imagemin.buffer(imageResponse.body,{
                         plugins:[
