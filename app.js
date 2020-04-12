@@ -7,7 +7,7 @@ imageminPngquant = require('imagemin-pngquant'),
 imageminMozjpeg = require('imagemin-mozjpeg'),
 imageminGifsicle = require('imagemin-gifsicle');
 
-var got = require('got');
+const got = require('got');
 /**
  * Init node server
  * 
@@ -57,14 +57,8 @@ async function processReq({ file, device, hd }, res) {
         ]
     }).catch(_=>{});
 
-    // imagemin = null;
-    // imageminGifsicle=null;
-    // imageminJpegtran=null;
-    // imageminMozjpeg=null;
-    // imageminPngquant=null;
     imageFile = null;
     quality= null;
-    // got = null;
 
     return res.end(compressedImage || "Couldn't compress image");
 
