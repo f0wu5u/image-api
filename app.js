@@ -42,7 +42,7 @@ async function processReq({ file, device, hd }, res) {
  
 
     var imageFile = await got(file, { encoding: null, timeout: 10000 })
-        .catch(error => console.log(error));
+        .catch(_ => {});
 
     if (!imageFile || !imageFile.body) return res.end("Couldn't load image from remote server");
 
@@ -53,9 +53,9 @@ async function processReq({ file, device, hd }, res) {
             imageminGifsicle({ optimizationLevel, interlaced: true }),
             imageminMozjpeg({ quality }),
             imageminJpegtran({ progressive: true }),
-            imageminPngquant({ quality: `${quality}-80` })
+            imageminPngquant({ quality: [quality/100,90/100]})
         ]
-    }).catch(error => console.log(error));
+    }).catch(_=>{});
 
     // imagemin = null;
     // imageminGifsicle=null;
